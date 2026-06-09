@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>長者居家環境防跌自我檢核表</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root{
     --orange:#E8552D;
@@ -147,8 +148,9 @@
   .ltc-box h3{font-size:1.3rem;margin-bottom:12px;}
   .ltc-box p{margin-bottom:10px;font-size:1.05rem;opacity:.96;}
   .ltc-box .phone{
-    display:inline-block;background:#fff;color:var(--teal);font-size:1.6rem;
-    font-weight:bold;padding:8px 24px;border-radius:30px;margin-top:6px;letter-spacing:2px;
+    display:inline-block;background:#fff;color:var(--teal);font-size:1.5rem;
+    font-weight:bold;padding:8px 22px;border-radius:30px;margin-top:6px;
+    letter-spacing:1px;max-width:100%;box-sizing:border-box;white-space:nowrap;
   }
   .subsidy-table{
     width:100%;border-collapse:collapse;margin:14px 0;background:rgba(255,255,255,.12);
@@ -203,7 +205,9 @@
   <div id="sections"></div>
   <div id="tableView" style="display:none;"></div>
 
-  <button class="result-btn" onclick="showResult()">📊 查看我的居家防跌分數與建議</button>
+  <button id="btnDownloadPdf" class="result-btn" style="display:none;background:var(--teal);" onclick="downloadTablePdf()">⬇️ 下載檢核表 PDF（印出使用）</button>
+
+  <button id="btnShowResult" class="result-btn" onclick="showResult()">📊 查看我的居家防跌分數與建議</button>
 
   <div class="result" id="result">
     <div class="score-ring">
@@ -229,7 +233,7 @@
       <div style="text-align:center;"><span class="phone">☎ 1966</span></div>
     </div>
     <div class="controls">
-      <button onclick="window.print()">🖨 列印 / 存成PDF</button>
+      <button onclick="downloadResultPdf()">⬇️ 下載結果 PDF</button>
       <button onclick="resetAll()">🔄 重新檢核</button>
     </div>
   </div>
@@ -343,7 +347,11 @@ function toggleTip(el){ el.closest('.item').classList.toggle('show-tip'); }
 // 產生可列印表格版本
 (function buildTable(){
   const tv = document.getElementById('tableView');
-  let h = `<table class="print-table"><caption>長者居家環境防跌檢核表</caption>
+  let h = `<div class="table-header">
+      <h2 style="color:var(--teal);margin-bottom:4px;">長者居家環境防跌檢核表</h2>
+      <p style="color:#5a6b6b;font-size:.95rem;margin-bottom:10px;">填表日期：____年__月__日　　長者姓名：__________　　填表人：__________</p>
+    </div>
+    <table class="print-table">
     <thead><tr><th>面向</th><th>檢核項目</th><th class="ckcol">沒問題</th><th class="ckcol">需改善</th><th class="ckcol">無此項</th></tr></thead><tbody>`;
   data.forEach(sec=>{
     sec.items.forEach((it,i)=>{
@@ -353,7 +361,7 @@ function toggleTip(el){ el.closest('.item').classList.toggle('show-tip'); }
     });
   });
   h += `</tbody></table>
-    <p style="font-size:.92rem;color:#5a6b6b;">填寫說明：請逐項勾選，「需改善」項目即為建議優先處理的居家防跌重點。如需專業到宅評估與補助，可撥打長照專線 1966。</p>`;
+    <p style="font-size:.92rem;color:#5a6b6b;line-height:1.6;">填寫說明：請逐項勾選，「需改善」的項目即為建議優先處理的居家防跌重點。如需專業到宅評估與補助，可撥打長照專線 1966，由職能或物理治療師到府評估。<br>資料來源：考科藍系統性回顧（Clemson et al., 2023）、衛福部國民健康署、衛生福利部長照3.0。本表僅供自我檢視參考，不取代專業評估。</p>`;
   tv.innerHTML = h;
 })();
 
@@ -363,18 +371,53 @@ function switchView(mode){
   const prog = document.querySelector('.progress-bar');
   const btnI = document.getElementById('btnInteractive');
   const btnT = document.getElementById('btnTable');
-  const resultBtn = document.querySelector('.result-btn');
+  const resultBtn = document.getElementById('btnShowResult');
+  const dlBtn = document.getElementById('btnDownloadPdf');
+  const resultBox = document.getElementById('result');
   if(mode==='table'){
     sec.style.display='none'; tbl.style.display='block';
     if(prog) prog.style.display='none';
     if(resultBtn) resultBtn.style.display='none';
+    if(resultBox) resultBox.classList.remove('show');
+    if(dlBtn) dlBtn.style.display='block';
     btnT.classList.add('active'); btnI.classList.remove('active');
   }else{
     sec.style.display='block'; tbl.style.display='none';
     if(prog) prog.style.display='block';
     if(resultBtn) resultBtn.style.display='block';
+    if(dlBtn) dlBtn.style.display='none';
     btnI.classList.add('active'); btnT.classList.remove('active');
   }
+}
+
+// 下載「空白表格版」PDF（供印出手寫使用）
+function downloadTablePdf(){
+  const el = document.getElementById('tableView');
+  if(typeof html2pdf === 'undefined'){ alert('PDF元件載入中，請稍候再試，或確認網路連線。'); return; }
+  const opt = {
+    margin:[10,8,10,8],
+    filename:'長者居家環境防跌檢核表.pdf',
+    image:{type:'jpeg',quality:0.98},
+    html2canvas:{scale:2,useCORS:true},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+    pagebreak:{mode:['css','legacy']}
+  };
+  html2pdf().set(opt).from(el).save();
+}
+
+// 下載「檢核結果」PDF（含分數、建議、補助說明）
+function downloadResultPdf(){
+  const el = document.getElementById('result');
+  if(typeof html2pdf === 'undefined'){ alert('PDF元件載入中，請稍候再試，或確認網路連線。'); return; }
+  const opt = {
+    margin:[10,8,10,8],
+    filename:'居家防跌檢核結果.pdf',
+    image:{type:'jpeg',quality:0.98},
+    html2canvas:{scale:2,useCORS:true},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+    pagebreak:{mode:['css','legacy']}
+  };
+  html2pdf().set(opt).from(el).save();
 }
 
 function updateProgress(){
