@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>長者居家環境防跌自我檢核表</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root{
     --orange:#E8552D;
@@ -205,7 +204,7 @@
   <div id="sections"></div>
   <div id="tableView" style="display:none;"></div>
 
-  <button id="btnDownloadPdf" class="result-btn" style="display:none;background:var(--teal);" onclick="downloadTablePdf()">⬇️ 下載檢核表 PDF（印出使用）</button>
+  <button id="btnDownloadPdf" class="result-btn" style="display:none;background:var(--teal);" onclick="downloadTablePdf()">⬇️ 產生檢核表 PDF（列印或另存）</button>
 
   <button id="btnShowResult" class="result-btn" onclick="showResult()">📊 查看我的居家防跌分數與建議</button>
 
@@ -233,7 +232,7 @@
       <div style="text-align:center;"><span class="phone">☎ 1966</span></div>
     </div>
     <div class="controls">
-      <button onclick="downloadResultPdf()">⬇️ 下載結果 PDF</button>
+      <button onclick="downloadResultPdf()">⬇️ 產生結果 PDF</button>
       <button onclick="resetAll()">🔄 重新檢核</button>
     </div>
   </div>
@@ -390,34 +389,92 @@ function switchView(mode){
   }
 }
 
-// 下載「空白表格版」PDF（供印出手寫使用）
-function downloadTablePdf(){
-  const el = document.getElementById('tableView');
-  if(typeof html2pdf === 'undefined'){ alert('PDF元件載入中，請稍候再試，或確認網路連線。'); return; }
-  const opt = {
-    margin:[10,8,10,8],
-    filename:'長者居家環境防跌檢核表.pdf',
-    image:{type:'jpeg',quality:0.98},
-    html2canvas:{scale:2,useCORS:true},
-    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-    pagebreak:{mode:['css','legacy']}
-  };
-  html2pdf().set(opt).from(el).save();
+// 共用：開新視窗、寫入乾淨HTML、觸發列印（可另存PDF），中文完全可靠
+function openPrintWindow(title, bodyHtml){
+  const css = `
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box;}
+      body{font-family:"Microsoft JhengHei","微軟正黑體",sans-serif;color:#12343B;line-height:1.6;padding:24px;}
+      h1{font-size:20px;color:#028090;margin-bottom:6px;}
+      h2{font-size:16px;color:#028090;margin:14px 0 8px;}
+      .meta{font-size:12px;color:#5a6b6b;margin-bottom:14px;}
+      table{width:100%;border-collapse:collapse;margin:8px 0 16px;}
+      th,td{border:1px solid #cdd8d8;padding:7px 9px;font-size:12.5px;vertical-align:top;}
+      thead th{background:#028090;color:#fff;}
+      .grp{background:#F4F8F8;font-weight:bold;}
+      .ckcol{width:48px;text-align:center;font-size:15px;}
+      .note{font-size:11.5px;color:#5a6b6b;line-height:1.6;margin-top:8px;}
+      .score{font-size:34px;font-weight:bold;text-align:center;margin:6px 0;}
+      .risk{text-align:center;font-size:15px;font-weight:bold;padding:8px;border-radius:6px;margin-bottom:12px;color:#fff;}
+      ul{list-style:none;margin:6px 0;}
+      li{padding:7px 10px;margin:5px 0;background:#F4F8F8;border-left:4px solid #D64545;border-radius:4px;font-size:13px;}
+      li.none{border-left-color:#2E8B57;background:#e6f4ec;}
+      .ltc{background:#eef6f7;border:1px solid #bcd9dd;border-radius:8px;padding:14px;margin-top:14px;font-size:13px;}
+      .ltc table{margin:8px 0;}
+      .ltc th,.ltc td{text-align:center;}
+      @media print{ body{padding:0;} @page{margin:14mm;} }
+    </style>`;
+  const w = window.open('', '_blank');
+  if(!w){ alert('請允許彈出視窗，才能產生PDF。'); return; }
+  w.document.write(`<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8"><title>${title}</title>${css}</head><body>${bodyHtml}</body></html>`);
+  w.document.close();
+  w.focus();
+  // 等內容與字體渲染完成再列印（onload雙保險）
+  w.onload = function(){ setTimeout(function(){ w.print(); }, 300); };
+  setTimeout(function(){ try{ if(!w.closed) w.print(); }catch(e){} }, 700);
 }
 
-// 下載「檢核結果」PDF（含分數、建議、補助說明）
+// 下載「空白表格版」（供印出手寫使用）
+function downloadTablePdf(){
+  let rows = '';
+  data.forEach(sec=>{
+    sec.items.forEach((it,i)=>{
+      rows += '<tr>';
+      if(i===0){ rows += `<td class="grp" rowspan="${sec.items.length}">${sec.icon} ${sec.title}</td>`; }
+      rows += `<td>${it.q}</td><td class="ckcol">☐</td><td class="ckcol">☐</td><td class="ckcol">☐</td></tr>`;
+    });
+  });
+  const body = `
+    <h1>長者居家環境防跌檢核表</h1>
+    <div class="meta">填表日期：____年__月__日　　長者姓名：____________　　填表人：____________</div>
+    <table>
+      <thead><tr><th>面向</th><th>檢核項目</th><th class="ckcol">沒問題</th><th class="ckcol">需改善</th><th class="ckcol">無此項</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p class="note">填寫說明：請逐項勾選，「需改善」的項目即為建議優先處理的居家防跌重點。如需專業到宅評估與補助，可撥打長照專線 1966，由職能或物理治療師到府評估。<br>資料來源：考科藍系統性回顧（Clemson et al., 2023）、衛福部國民健康署、衛生福利部長照3.0。本表僅供自我檢視參考，不取代專業評估。</p>`;
+  openPrintWindow('長者居家環境防跌檢核表', body);
+}
+
+// 下載「檢核結果」（含分數、建議、補助說明）
 function downloadResultPdf(){
-  const el = document.getElementById('result');
-  if(typeof html2pdf === 'undefined'){ alert('PDF元件載入中，請稍候再試，或確認網路連線。'); return; }
-  const opt = {
-    margin:[10,8,10,8],
-    filename:'居家防跌檢核結果.pdf',
-    image:{type:'jpeg',quality:0.98},
-    html2canvas:{scale:2,useCORS:true},
-    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-    pagebreak:{mode:['css','legacy']}
-  };
-  html2pdf().set(opt).from(el).save();
+  const scoreTxt = document.getElementById('scoreNum').textContent;
+  const riskEl = document.getElementById('riskLevel');
+  const riskTxt = riskEl.textContent;
+  const riskColor = riskEl.style.background || '#028090';
+  const adviceHtml = document.getElementById('adviceList').innerHTML;
+  const body = `
+    <h1>居家防跌檢核結果</h1>
+    <div class="meta">產生日期：${new Date().toLocaleDateString('zh-TW')}</div>
+    <div class="score" style="color:${riskColor};">${scoreTxt}</div>
+    <div class="risk" style="background:${riskColor};">${riskTxt}</div>
+    <h2>🔧 建議優先改善項目</h2>
+    <ul>${adviceHtml}</ul>
+    <div class="ltc">
+      <h2 style="margin-top:0;">💡 善用長照3.0補助資源</h2>
+      <p><b>補助對象：</b>經長照管理中心評估、符合長照需要等級者，含65歲以上失能者、50歲以上失智症者（2026年起放寬年輕型失智）、領有身心障礙證明者（不限年齡）。</p>
+      <p style="margin-top:6px;"><b>補助內容：</b>「輔具及居家無障礙環境改善」給付，每3年最高4萬元，由職能或物理治療師到宅評估。自2026年7月起改選「全租賃智慧科技輔具」（二擇一）為每3年最高6萬元，「安全看視」設備對失智或獨居長者尤其實用。</p>
+      <table>
+        <thead><tr><th>身分別</th><th>政府補助</th><th>民眾自付</th></tr></thead>
+        <tbody>
+          <tr><td>一般戶</td><td>70%</td><td>30%</td></tr>
+          <tr><td>中低收入戶</td><td>90%</td><td>10%</td></tr>
+          <tr><td>低收入戶</td><td>全額</td><td>0%</td></tr>
+        </tbody>
+      </table>
+      <p class="note">※ 若同時領有身心障礙證明，相同輔具項目不可向長照與身障兩邊重複申請，建議擇優使用。詳情可洽各地長照管理中心或輔具資源中心，或撥打長照專線 1966。</p>
+    </div>
+    <p class="note" style="margin-top:14px;">本表僅供自我檢視參考，不取代專業評估。資料來源：考科藍系統性回顧（Clemson et al., 2023）、衛福部國民健康署、衛生福利部長照3.0。</p>`;
+  openPrintWindow('居家防跌檢核結果', body);
 }
 
 function updateProgress(){
