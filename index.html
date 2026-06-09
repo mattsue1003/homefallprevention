@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>長者居家環境防跌自我檢核表</title>
+<style>
+  :root{
+    --orange:#E8552D;
+    --amber:#F4A93C;
+    --teal:#028090;
+    --ink:#12343B;
+    --cloud:#F4F8F8;
+    --green:#2E8B57;
+    --red:#D64545;
+    --shadow:0 4px 18px rgba(18,52,59,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:"Microsoft JhengHei","微軟正黑體",-apple-system,BlinkMacSystemFont,sans-serif;
+    background:linear-gradient(160deg,#fdf6ee 0%,var(--cloud) 60%);
+    color:var(--ink);
+    line-height:1.7;
+    padding:0 0 60px;
+    min-height:100vh;
+  }
+  header{
+    background:var(--ink);
+    color:#fff;
+    padding:30px 20px 28px;
+    text-align:center;
+  }
+  header h1{font-size:1.7rem;letter-spacing:1px;margin-bottom:8px;}
+  header p{font-size:1.05rem;opacity:.9;font-weight:300;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px;}
+
+  .intro{
+    background:#fff;border-radius:14px;box-shadow:var(--shadow);
+    padding:20px 22px;margin:24px 0;font-size:1.1rem;
+    border-left:6px solid var(--amber);
+  }
+  .intro strong{color:var(--orange);}
+
+  .progress-bar{
+    position:sticky;top:0;z-index:20;
+    background:rgba(244,248,248,.96);backdrop-filter:blur(6px);
+    padding:12px 16px;border-bottom:1px solid #e3e9e9;
+  }
+  .progress-bar .track{
+    max-width:760px;margin:0 auto;height:14px;background:#e0e7e7;
+    border-radius:20px;overflow:hidden;
+  }
+  .progress-bar .fill{
+    height:100%;width:0;background:linear-gradient(90deg,var(--amber),var(--orange));
+    border-radius:20px;transition:width .4s ease;
+  }
+  .progress-bar .label{
+    max-width:760px;margin:6px auto 0;font-size:.95rem;text-align:center;color:var(--teal);font-weight:bold;
+  }
+
+  .section{
+    background:#fff;border-radius:14px;box-shadow:var(--shadow);
+    margin:22px 0;overflow:hidden;
+  }
+  .section-head{
+    background:var(--teal);color:#fff;padding:14px 20px;
+    font-size:1.25rem;font-weight:bold;display:flex;align-items:center;gap:10px;
+  }
+  .section-head .icon{font-size:1.5rem;}
+  .item{
+    padding:16px 20px;border-bottom:1px solid #eef2f2;
+  }
+  .item:last-child{border-bottom:none;}
+  .item .q{font-size:1.12rem;margin-bottom:10px;font-weight:500;}
+  .view-toggle{display:flex;gap:10px;margin:8px 0 18px;}
+  .vt-btn{
+    flex:1;padding:11px;border-radius:10px;border:2px solid var(--teal);
+    background:#fff;color:var(--teal);font-size:1.05rem;font-weight:bold;
+    cursor:pointer;font-family:inherit;transition:all .2s;
+  }
+  .vt-btn.active{background:var(--teal);color:#fff;}
+  .print-table{width:100%;border-collapse:collapse;margin:10px 0 26px;background:#fff;}
+  .print-table caption{font-size:1.15rem;font-weight:bold;color:var(--teal);text-align:left;padding:14px 4px 8px;}
+  .print-table th,.print-table td{border:1px solid #cdd8d8;padding:9px 11px;font-size:1rem;vertical-align:top;}
+  .print-table thead th{background:var(--teal);color:#fff;}
+  .print-table .grp{background:var(--cloud);font-weight:bold;color:var(--ink);}
+  .print-table .ckcol{width:54px;text-align:center;}
+  .item .tip{
+    font-size:.95rem;color:#5a6b6b;background:var(--cloud);
+    padding:8px 12px;border-radius:8px;margin-top:10px;display:none;
+    border-left:3px solid var(--amber);
+  }
+  .item.show-tip .tip{display:block;}
+  .opts{display:flex;gap:12px;flex-wrap:wrap;}
+  .opts label{
+    flex:1;min-width:130px;cursor:pointer;
+  }
+  .opts input{position:absolute;opacity:0;}
+  .opts span{
+    display:block;text-align:center;padding:12px 8px;border-radius:10px;
+    border:2px solid #d8e0e0;font-size:1.05rem;font-weight:bold;transition:all .2s;
+    background:#fafcfc;
+  }
+  .opts .ok span{color:var(--green);}
+  .opts .no span{color:var(--red);}
+  .opts .na span{color:#8a9a9a;}
+  .opts input:checked + span{transform:translateY(-2px);box-shadow:0 3px 10px rgba(0,0,0,.12);}
+  .opts .ok input:checked + span{background:#e6f4ec;border-color:var(--green);}
+  .opts .no input:checked + span{background:#fbe9e9;border-color:var(--red);}
+  .opts .na input:checked + span{background:#eef2f2;border-color:#8a9a9a;}
+
+  .result-btn{
+    display:block;width:100%;padding:18px;margin:30px 0 10px;
+    background:var(--orange);color:#fff;border:none;border-radius:14px;
+    font-size:1.3rem;font-weight:bold;cursor:pointer;box-shadow:var(--shadow);
+    font-family:inherit;transition:transform .15s;
+  }
+  .result-btn:hover{transform:translateY(-2px);}
+
+  .result{
+    display:none;background:#fff;border-radius:14px;box-shadow:var(--shadow);
+    padding:26px 22px;margin:20px 0;
+  }
+  .result.show{display:block;animation:fade .5s;}
+  @keyframes fade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+  .score-ring{
+    text-align:center;margin-bottom:18px;
+  }
+  .score-num{font-size:3rem;font-weight:bold;line-height:1;}
+  .score-label{font-size:1.15rem;margin-top:6px;font-weight:bold;}
+  .risk-level{
+    text-align:center;padding:12px;border-radius:10px;font-size:1.2rem;
+    font-weight:bold;margin-bottom:18px;color:#fff;
+  }
+  .advice h3{color:var(--teal);font-size:1.2rem;margin:18px 0 10px;border-bottom:2px solid var(--amber);padding-bottom:6px;}
+  .advice ul{list-style:none;}
+  .advice li{
+    padding:10px 14px;margin:8px 0;background:var(--cloud);border-radius:8px;
+    border-left:4px solid var(--red);font-size:1.05rem;
+  }
+  .advice .none{border-left-color:var(--green);background:#e6f4ec;}
+
+  .ltc-box{
+    background:linear-gradient(135deg,var(--teal),#016b78);color:#fff;
+    border-radius:14px;padding:22px;margin:24px 0;box-shadow:var(--shadow);
+  }
+  .ltc-box h3{font-size:1.3rem;margin-bottom:12px;}
+  .ltc-box p{margin-bottom:10px;font-size:1.05rem;opacity:.96;}
+  .ltc-box .phone{
+    display:inline-block;background:#fff;color:var(--teal);font-size:1.6rem;
+    font-weight:bold;padding:8px 24px;border-radius:30px;margin-top:6px;letter-spacing:2px;
+  }
+  .subsidy-table{
+    width:100%;border-collapse:collapse;margin:14px 0;background:rgba(255,255,255,.12);
+    border-radius:8px;overflow:hidden;font-size:1.02rem;
+  }
+  .subsidy-table th,.subsidy-table td{
+    padding:9px 12px;text-align:center;border:1px solid rgba(255,255,255,.25);
+  }
+  .subsidy-table th{background:rgba(255,255,255,.18);font-weight:bold;}
+
+  .controls{display:flex;gap:12px;margin-top:16px;}
+  .controls button{
+    flex:1;padding:12px;border-radius:10px;border:2px solid var(--teal);
+    background:#fff;color:var(--teal);font-size:1.05rem;font-weight:bold;
+    cursor:pointer;font-family:inherit;
+  }
+  .controls button:hover{background:var(--cloud);}
+
+  footer{text-align:center;font-size:.85rem;color:#8a9a9a;margin-top:30px;padding:0 20px;line-height:1.6;}
+
+  @media(max-width:480px){
+    header h1{font-size:1.35rem;}
+    .section-head{font-size:1.1rem;}
+    .item .q{font-size:1.05rem;}
+    .opts label{min-width:100%;}
+    .score-num{font-size:2.5rem;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🏠 長者居家環境防跌自我檢核表</h1>
+  <p>逐區檢視家中環境，找出跌倒風險，獲得個別化調整建議</p>
+</header>
+
+<div class="progress-bar">
+  <div class="track"><div class="fill" id="fill"></div></div>
+  <div class="label" id="progLabel">完成度 0%</div>
+</div>
+
+<div class="wrap">
+  <div class="intro">
+    請依家中實際狀況，逐題勾選 <strong>✓ 沒問題</strong>、<strong>✗ 需改善</strong> 或 <strong>無此項</strong>。
+    每題下方點一下可展開「為什麼重要」。全部填完後按底部按鈕，即可看到您的居家防跌分數與建議。
+  </div>
+
+  <div class="view-toggle">
+    <button id="btnInteractive" class="vt-btn active" onclick="switchView('interactive')">📱 互動檢核</button>
+    <button id="btnTable" class="vt-btn" onclick="switchView('table')">📋 表格版（可列印）</button>
+  </div>
+
+  <div id="sections"></div>
+  <div id="tableView" style="display:none;"></div>
+
+  <button class="result-btn" onclick="showResult()">📊 查看我的居家防跌分數與建議</button>
+
+  <div class="result" id="result">
+    <div class="score-ring">
+      <div class="score-num" id="scoreNum">—</div>
+      <div class="score-label" id="scoreLabel">安全分數</div>
+    </div>
+    <div class="risk-level" id="riskLevel"></div>
+    <div class="advice">
+      <h3>🔧 建議優先改善項目</h3>
+      <ul id="adviceList"></ul>
+    </div>
+    <div class="ltc-box">
+      <h3>💡 善用長照3.0補助資源</h3>
+      <p><strong>補助對象：</strong>經各縣市長期照顧管理中心評估、符合長照需要等級者，包含65歲以上失能者、50歲以上失智症者（2026年起放寬年輕型失智）、領有身心障礙證明者（不限年齡）。</p>
+      <p><strong>補助內容：</strong>可申請「輔具及居家無障礙環境改善」給付，<strong>每3年最高4萬元</strong>，由甲類輔具評估人員（職能治療師／物理治療師）到宅評估後施作。自2026年7月1日起，若改選「全租賃智慧科技輔具」（與傳統輔具二擇一），額度提高為<strong>每3年最高6萬元</strong>，其中「安全看視」設備（如離床、跌倒偵測）對失智或獨居長者尤其實用。</p>
+      <table class="subsidy-table">
+        <tr><th>身分別</th><th>政府補助</th><th>民眾自付</th></tr>
+        <tr><td>一般戶</td><td>70%</td><td>30%</td></tr>
+        <tr><td>中低收入戶</td><td>90%</td><td>10%</td></tr>
+        <tr><td>低收入戶</td><td>全額</td><td>0%</td></tr>
+      </table>
+      <p style="font-size:.95rem;opacity:.92;">※ 若同時領有身心障礙證明，相同輔具項目不可向長照與身障兩邊重複申請，建議比較後擇優使用。詳情可洽各地長照管理中心或輔具資源中心。</p>
+      <div style="text-align:center;"><span class="phone">☎ 1966</span></div>
+    </div>
+    <div class="controls">
+      <button onclick="window.print()">🖨 列印 / 存成PDF</button>
+      <button onclick="resetAll()">🔄 重新檢核</button>
+    </div>
+  </div>
+
+  <footer>
+    本檢核表依據衛福部國民健康署《長者防跌妙招手冊》及國際實證文獻設計，僅供自我檢視參考，不取代專業評估。<br>
+    資料來源：考科藍系統性回顧（Clemson et al., 2023）、衛福部國民健康署《長者防跌妙招手冊》與失智友善居家環境建議、衛生福利部長期照顧十年計畫3.0。
+  </footer>
+</div>
+
+<script>
+const data = [
+  {
+    title:"通道與地面", icon:"🚶",
+    items:[
+      {q:"通道無障礙物、淨空，沒有電線、雜物或矮傢俱絆腳", tip:"地面雜物與橫越的電線是最常見的絆倒原因。具體做法：將延長線沿牆固定或加裝壓線條，移除走道上的報架、椅凳等矮傢俱，通道至少保留80公分以上淨寬。"},
+      {q:"主要通道設有扶手，行走時有支撐", tip:"走廊、長通道加裝扶手能在失去平衡時提供支撐。具體做法：水平扶手安裝高度約離地75～85公分（約手自然下垂、手腕的高度），需鎖在實牆或加裝背板，能承受體重。"},
+      {q:"地面花色簡單，不會過於複雜或眼花", tip:"複雜花紋會干擾長者對地面高低與邊界的判斷，建議選素色或低對比花紋的地板與地毯。"},
+      {q:"地面材質摩擦力大、防滑，不光滑反光", tip:"具體做法：可在光滑磁磚上塗防滑劑、貼防滑條，或鋪設止滑地墊；選購地板時認明防滑係數（R值）較高的材質。"},
+      {q:"地毯、踏墊已固定或下方加防滑墊，邊緣不翹起", tip:"鬆動或捲邊的地毯極易勾絆。具體做法：四角用雙面膠或防滑網固定，或直接改用背面附止滑底的踏墊。"}
+    ]
+  },
+  {
+    title:"照明", icon:"💡",
+    items:[
+      {q:"室內亮度足夠，白天與夜間都看得清楚地面", tip:"長者所需照度約為年輕人的2～3倍。具體做法：走道、樓梯、廚房等處可改用較高瓦數或多顆燈泡，並選用演色性好的白光或自然光燈。"},
+      {q:"燈光不會太亮或刺眼，地面少有強烈陰影", tip:"過亮、刺眼或不均勻的光線會產生陰影，被誤判為高低差。具體做法：燈具加裝燈罩或選霧面燈泡，讓光線柔和均勻，避免裸燈直射。"},
+      {q:"電燈開關位置方便，進門、床邊伸手可及", tip:"具體做法：在房間入口與床頭兩端都設開關（雙切開關），或改用感應式、夜光開關，避免摸黑找開關。"},
+      {q:"走道、臥室到廁所動線裝有夜燈", tip:"夜間如廁是高風險時段。具體做法：在臥室到廁所沿線插上感應式小夜燈，或選有微光的插座，半夜起身免開大燈。"}
+    ]
+  },
+  {
+    title:"床與座椅", icon:"🛏️",
+    items:[
+      {q:"床鋪高度適當，坐在床邊雙腳能平踏地面", tip:"臥室是長者室內跌傷最高的地點（35.6%）。具體判斷：坐在床緣時膝蓋約呈90度、雙腳能平穩踏地最理想（床面高度約40～50公分）。太高可換矮床架，太低可加床墊或床腳墊高。"},
+      {q:"床墊不會太軟，起身時支撐穩定", tip:"過軟的床墊會讓長者起身時下沉、不易施力。具體判斷：坐下時床面下陷不超過幾公分、邊緣有支撐感為佳。"},
+      {q:"座椅、沙發穩定，不會搖晃或滑動", tip:"具體做法：選有椅背與扶手、四腳穩固的椅子，避免有滾輪或過軟的沙發；必要時在椅腳加防滑墊。"},
+      {q:"座椅高度適當、附扶手，起身不費力", tip:"具體判斷：坐下時膝蓋約90度、雙腳平踏地面，且有扶手可撐。過低的座椅會增加起身困難，可加坐墊墊高。"}
+    ]
+  },
+  {
+    title:"浴室", icon:"🚿",
+    items:[
+      {q:"浴室地面保持乾燥、做了防滑處理", tip:"浴室是室內跌傷第三高地點（17%）。具體做法：濕區貼防滑條／防滑貼或塗防滑劑，鋪設背面止滑的防滑墊，使用後隨手刮乾地面、保持通風乾燥。"},
+      {q:"浴缸不會太深，進出不需大幅抬腳跨越", tip:"過深浴缸進出時需單腳大幅抬高，極易失衡。具體做法：使用頻率不高者可考慮改為無門檻淋浴區，或加裝浴缸防滑椅輔助進出。"},
+      {q:"浴缸／淋浴處裝有牢固扶手", tip:"具體做法：淋浴區同時裝垂直＋水平扶手提供不同角度支撐；扶手選防滑、表面圓滑材質，務必鎖在實牆。裝錯高度或鎖在隔板上反而危險。"},
+      {q:"浴缸／淋浴區地面加裝防滑墊", tip:"防滑墊能在最濕滑的區域提供額外止滑，選背面吸盤式、可固定的款式，定期清洗避免發霉變滑。"},
+      {q:"馬桶高度適當，起身坐下不費力", tip:"具體判斷：馬桶座高建議45～50公分（一般馬桶約35～40公分偏低）。太低可加裝「增高馬桶座」減輕起身負擔。"},
+      {q:"馬桶旁裝有牢固扶手", tip:"如廁起身是常見跌倒情境。具體做法：馬桶側邊裝水平或L型扶手，水平段約離地70～80公分、距馬桶中心約35公分，可選可上掀式節省空間。"}
+    ]
+  },
+  {
+    title:"樓梯", icon:"🪜",
+    items:[
+      {q:"樓梯兩側或至少一側裝有穩固扶手", tip:"扶手是上下樓梯最重要的防跌設施。具體做法：扶手高度約離梯級踏面75～85公分，最好兩側都裝，且延伸到樓梯頭尾各一階，方便起步與收步時抓握。"},
+      {q:"樓梯光線充足，上下樓入口都有開關", tip:"看不清階梯是踏空主因。具體做法：在樓梯上、下兩端都設開關（雙切），夜間保留小夜燈。"},
+      {q:"光源位置適當，不在階梯面造成陰影或眩光", tip:"光源角度不當會在階梯投下陰影，干擾高低判斷。建議燈光從上方均勻照下，避免逆光或側面強光。"},
+      {q:"階梯邊緣清楚可辨（防滑條或對比／夜光標示）", tip:"具體做法：在每階邊緣貼上與階面顏色「對比」的防滑條（如深色階面貼淺色條），兼具防滑與辨識，夜光款式夜間更清楚。"},
+      {q:"階梯高度適當、一致，沒有忽高忽低", tip:"階高不一致會打亂行走節奏造成踏空。若有單一突起的高低差（如門檻），可加斜角條或明顯標示。"}
+    ]
+  },
+  {
+    title:"失智／認知友善（若長者有失智或認知退化）", icon:"🧠",
+    items:[
+      {q:"地板與家具、椅子採用「對比色」，看得出高低與邊界", tip:"失智長者空間認知退化，同色的椅子與地板可能被誤以為同一平面。具體做法：淺色地板搭深色椅子、白色馬桶搭深色地磚或深色馬桶蓋，用顏色差異標出邊界。"},
+      {q:"室內光線充足且均勻，地面少有強烈陰影或刺眼亮光", tip:"不均勻的光線與地面陰影容易被誤判為高低差或障礙物。建議全室均勻照明，避免局部過亮或大片陰影。"},
+      {q:"減少大面積磁磚反光、鏡子或玻璃造成的反射", tip:"反光與鏡面易引起失智者視幻覺與不安。具體做法：改用霧面磁磚，不需要的鏡子可移除或加布簾遮蓋，落地窗加窗簾減少反射。"},
+      {q:"動線單純、淨空，避免經常變更家具擺設位置", tip:"失智者依賴熟悉的空間記憶，動線複雜或常變動會增加混亂與絆倒。家具位置盡量固定不要常搬動。"},
+      {q:"重要空間（如廁所）門口有圖示或對比標示，容易找到", tip:"具體做法：在廁所門貼上馬桶圖示、用對比色或文字標示門口，幫助失智長者順利如廁，減少夜間摸索跌倒。"},
+      {q:"危險區域（廚房、樓梯口）有適度防護或提醒", tip:"失智者可能遊走至危險區域。具體做法：樓梯口可裝安全門欄，廚房瓦斯加裝防呆裝置，並確保這些區域扶手與防滑到位。"}
+    ]
+  },
+  {
+    title:"個人與用藥", icon:"👟",
+    items:[
+      {q:"長者穿著合腳、防滑的鞋子（非拖鞋或過大鞋）", tip:"不合腳的鞋與寬鬆拖鞋是常被忽略的跌倒因子。具體做法：選後跟包覆、鞋底防滑、有黏扣帶可調整鬆緊的鞋，室內避免穿易滑的襪子或無後跟拖鞋。"},
+      {q:"使用的拐杖／助行器尺寸合適、橡膠頭未磨損", tip:"具體判斷：站直手自然下垂時，握把約在手腕高度為宜。定期檢查橡膠腳墊有無磨平、龜裂，磨損即更換。"},
+      {q:"正在服用的藥物已請醫師／藥師檢視過", tip:"部分鎮靜、安眠、降血壓、降血糖藥物會增加頭暈與跌倒風險。建議每年或調藥時帶所有藥物（含成藥、保健品）請醫師或藥師做一次「用藥整合」檢視。"},
+      {q:"長者定期接受健康檢查，並留意視力、聽力變化", tip:"視力、聽力與平衡感下降都與跌倒密切相關。具體做法：65歲以上每年可使用1次政府補助的成人預防保健服務；若視力模糊、配鏡度數不合或聽不清楚，盡早就醫檢查。"}
+    ]
+  }
+];
+
+let totalItems = 0;
+const container = document.getElementById('sections');
+
+data.forEach((sec, si)=>{
+  const secEl = document.createElement('div');
+  secEl.className = 'section';
+  let html = `<div class="section-head"><span class="icon">${sec.icon}</span>${sec.title}</div>`;
+  sec.items.forEach((it, ii)=>{
+    totalItems++;
+    const name = `q_${si}_${ii}`;
+    html += `
+      <div class="item" data-name="${name}">
+        <div class="q" onclick="toggleTip(this)">${it.q} <span style="color:var(--teal);font-size:.85rem;">（為什麼？）</span></div>
+        <div class="opts">
+          <label class="ok"><input type="radio" name="${name}" value="ok" onchange="updateProgress()"><span>✓ 沒問題</span></label>
+          <label class="no"><input type="radio" name="${name}" value="no" onchange="updateProgress()" data-q="${it.q}"><span>✗ 需改善</span></label>
+          <label class="na"><input type="radio" name="${name}" value="na" onchange="updateProgress()"><span>無此項</span></label>
+        </div>
+        <div class="tip">${it.tip}</div>
+      </div>`;
+  });
+  secEl.innerHTML = html;
+  container.appendChild(secEl);
+});
+
+function toggleTip(el){ el.closest('.item').classList.toggle('show-tip'); }
+
+// 產生可列印表格版本
+(function buildTable(){
+  const tv = document.getElementById('tableView');
+  let h = `<table class="print-table"><caption>長者居家環境防跌檢核表</caption>
+    <thead><tr><th>面向</th><th>檢核項目</th><th class="ckcol">沒問題</th><th class="ckcol">需改善</th><th class="ckcol">無此項</th></tr></thead><tbody>`;
+  data.forEach(sec=>{
+    sec.items.forEach((it,i)=>{
+      h += `<tr>`;
+      if(i===0){ h += `<td class="grp" rowspan="${sec.items.length}">${sec.icon} ${sec.title}</td>`; }
+      h += `<td>${it.q}</td><td class="ckcol">☐</td><td class="ckcol">☐</td><td class="ckcol">☐</td></tr>`;
+    });
+  });
+  h += `</tbody></table>
+    <p style="font-size:.92rem;color:#5a6b6b;">填寫說明：請逐項勾選，「需改善」項目即為建議優先處理的居家防跌重點。如需專業到宅評估與補助，可撥打長照專線 1966。</p>`;
+  tv.innerHTML = h;
+})();
+
+function switchView(mode){
+  const sec = document.getElementById('sections');
+  const tbl = document.getElementById('tableView');
+  const prog = document.querySelector('.progress-bar');
+  const btnI = document.getElementById('btnInteractive');
+  const btnT = document.getElementById('btnTable');
+  const resultBtn = document.querySelector('.result-btn');
+  if(mode==='table'){
+    sec.style.display='none'; tbl.style.display='block';
+    if(prog) prog.style.display='none';
+    if(resultBtn) resultBtn.style.display='none';
+    btnT.classList.add('active'); btnI.classList.remove('active');
+  }else{
+    sec.style.display='block'; tbl.style.display='none';
+    if(prog) prog.style.display='block';
+    if(resultBtn) resultBtn.style.display='block';
+    btnI.classList.add('active'); btnT.classList.remove('active');
+  }
+}
+
+function updateProgress(){
+  let answered = 0;
+  document.querySelectorAll('.item').forEach(it=>{
+    if(it.querySelector('input:checked')) answered++;
+  });
+  const pct = Math.round(answered/totalItems*100);
+  document.getElementById('fill').style.width = pct+'%';
+  document.getElementById('progLabel').textContent = `完成度 ${pct}%（${answered} / ${totalItems} 題）`;
+}
+
+function showResult(){
+  let scored = 0, ok = 0;
+  const problems = [];
+  document.querySelectorAll('.item').forEach(it=>{
+    const checked = it.querySelector('input:checked');
+    if(!checked) return;
+    if(checked.value === 'na') return;
+    scored++;
+    if(checked.value === 'ok') ok++;
+    else {
+      const q = it.querySelector('input[value="no"]').dataset.q;
+      problems.push(q);
+    }
+  });
+
+  const result = document.getElementById('result');
+  if(scored === 0){
+    alert('請至少完成一題檢核，再查看結果。');
+    return;
+  }
+
+  const score = Math.round(ok/scored*100);
+  document.getElementById('scoreNum').textContent = score + '分';
+
+  const riskEl = document.getElementById('riskLevel');
+  let color, text;
+  if(score >= 85){ color='var(--green)'; text='👍 居家環境相對安全，請持續維持'; }
+  else if(score >= 60){ color='var(--amber)'; text='⚠️ 環境尚可，有幾處建議盡快改善'; }
+  else { color='var(--red)'; text='🚨 跌倒風險偏高，建議盡快改善並尋求專業評估'; }
+  riskEl.style.background = color;
+  riskEl.textContent = text;
+  document.getElementById('scoreNum').style.color = color;
+
+  const list = document.getElementById('adviceList');
+  list.innerHTML = '';
+  if(problems.length === 0){
+    list.innerHTML = '<li class="none">太好了！您勾選的項目都沒有發現明顯風險，請繼續保持，並定期重新檢視。</li>';
+  } else {
+    problems.forEach(p=>{
+      const li = document.createElement('li');
+      li.textContent = p.replace(/，/g,'，');
+      list.appendChild(li);
+    });
+  }
+
+  result.classList.add('show');
+  result.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function resetAll(){
+  document.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);
+  document.getElementById('result').classList.remove('show');
+  updateProgress();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+</script>
+</body>
+</html>
